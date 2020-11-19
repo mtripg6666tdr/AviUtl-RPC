@@ -12,4 +12,5 @@ BOOL func_save_start(FILTER*);
 BOOL func_save_end(FILTER*);
 BOOL func_modify_title(FILTER*);
 BOOL func_WndProc(HWND, UINT, WPARAM, LPARAM, void*, FILTER*);
+BOOL Display_RPC(FILTER*, void*);
 #endif // !AVIUTL_DISCORD_RPC_MAIN

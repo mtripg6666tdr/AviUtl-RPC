@@ -10,6 +10,8 @@ typedef struct {
 	short x, y;
 } Vector2;
 static void* buf0 = NULL;
+static BOOL RPC_Enabled = TRUE;
+static BOOL IS_SAVING = FALSE;
 
 //---------------------------------------------------------------------
 //		フィルタ構造体定義
@@ -124,15 +126,38 @@ BOOL func_save_end(FILTER* fp, void* editP) {
 }
 
 //---------------------------------------------------------------------
-//		出力終了
+//		ウインドウタイトル変更
 //---------------------------------------------------------------------
 BOOL func_modify_title(FILTER* fp, void* editP, int frame, LPSTR title, int max_title) {
-
+	Display_RPC(fp, editP);
+	return TRUE;
 }
 
 //---------------------------------------------------------------------
 //		ウインドウプロシージャ
 //---------------------------------------------------------------------
 BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* editPtr, FILTER* filterPtr) {
+	switch (message) {
+	case WM_PAINT:
+	case WM_FILTER_CHANGE_EDIT:
+		Display_RPC(filterPtr, editPtr);
+		break;
+	case WM_FILTER_CHANGE_WINDOW:
+		if (filterPtr->exfunc->is_filter_window_disp(filterPtr)) {
+			mem_alloc(filterPtr);
+			return TRUE;
+		}
+		else {
+			mem_free();
+		}
+		break;
+	}
+	return FALSE;
+}
+
+//---------------------------------------------------------------------
+//		Discord RPC 設定関数
+//---------------------------------------------------------------------
+BOOL Display_RPC(FILTER* fp, void* editP) {
 
 }
