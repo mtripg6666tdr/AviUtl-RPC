@@ -72,7 +72,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries;$(LibraryPath)</LibraryPath>
+    <TargetExt>.auf</TargetExt>
+    <TargetName>aviutl_rpc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -93,8 +95,22 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <ModuleDefinitionFile>Source.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>main.def</ModuleDefinitionFile>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo Installing compiled plugin...
+copy /Y /V "$(OutputPath)$(TargetFileName)" "$(OutputPath)executable\"
+copy /Y /V "$(OutputPath)*.dll" "$(OutputPath)executable\"
+echo Success</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Debug\executable以下のデバッグ用AviUtlにインストール</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

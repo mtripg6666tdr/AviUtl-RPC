@@ -1,2 +1,4 @@
+LIBRARY aviutl_rpc.auf
+
 EXPORTS
 	GetFilterTable @1
