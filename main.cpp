@@ -240,7 +240,7 @@ BOOL Initialize_RPC() {
 	if (IS_Disposed) {
 		IS_Disposed = FALSE;
 		discord::Core::Create(FILTER_RPC_CLIENT_ID, DiscordCreateFlags_NoRequireDiscord, &core);
-		activity.SetState("起動中");
+		activity.SetState(u8"起動中");
 		//activity.SetDetails("");
 		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 			
@@ -259,12 +259,12 @@ BOOL Display_RPC(FILTER* fp, void* editPtr) {
 	if (!IS_Disposed) {
 		std::string State = "";
 		if (IS_SAVING) {
-			State = "エンコード中";
+			State = u8"エンコード中";
 		}else if (FILE_NAME == NULL) {
-			State = "アイドル中";
+			State = u8"アイドル中";
 		}
 		else {
-			State = "編集中";
+			State = u8"編集中";
 		}
 		activity.SetState(State.c_str());
 		if (FILE_NAME != NULL) {
