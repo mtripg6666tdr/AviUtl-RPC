@@ -4,7 +4,7 @@
 
 // インクルード
 #include <Windows.h>
-#include <iostream>
+#include <string>
 #include "aviutl-sdk/filter.h"
 #include "main.h"
 #include "discord-files/discord.h"
@@ -33,7 +33,7 @@ discord::Activity activity{};
 //---------------------------------------------------------------------
 //		フィルタ構造体定義
 //---------------------------------------------------------------------
-TCHAR   FILTER_NAME[]          = "RPC";
+TCHAR   FILTER_NAME[]          = "AviUtl Discord RPC";
 #define CHECK_NUM 1
 TCHAR  *CHECKBOX_NAMES[]       = { "有効にする" };
 int     CHECKBOX_INITIAL_VAL[] = { 0 };
@@ -41,7 +41,7 @@ TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC Plugin version 0.99b by mtr
 
 FILTER_DLL filter = {
 	// flag
-	FILTER_FLAG_ALWAYS_ACTIVE | FILTER_FLAG_EX_INFORMATION | FILTER_FLAG_CONFIG_CHECK,
+	FILTER_FLAG_ALWAYS_ACTIVE | FILTER_FLAG_DISP_FILTER | FILTER_FLAG_EX_INFORMATION,
 	// x, y
 	NULL, NULL,
 	// name
@@ -135,7 +135,6 @@ BOOL func_init(FILTER* fp) {
 	else {
 		throw;
 	}
-	Initialize_RPC();
 	return TRUE;
 }
 
@@ -202,10 +201,9 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 	FILE_INFO* fi = NULL;
 
 	switch (message) {
-	case WM_PAINT:
-	case WM_FILTER_CHANGE_EDIT:
-		Display_RPC(filterPtr, editPtr);
-		break;
+	/*case WM_FILTER_CHANGE_EDIT:
+		core->RunCallbacks();
+		break;*/
 	case WM_FILTER_CHANGE_WINDOW:
 		if (filterPtr->exfunc->is_filter_window_disp(filterPtr)) {
 			mem_alloc(filterPtr);
@@ -225,7 +223,7 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 		break;
 	case WM_FILTER_FILE_CLOSE:
 		FILE_NAME = NULL;
-		Display_RPC(filterPtr, editPtr);
+		core->RunCallbacks();
 		break;
 	}
 	return FALSE;
@@ -236,13 +234,16 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 //---------------------------------------------------------------------
 #define FILTER_RPC_CLIENT_ID 779296320019497020
 BOOL Initialize_RPC() {
+	if (!RPC_Enabled) {
+		return false;
+	}
 	if (IS_Disposed) {
 		IS_Disposed = FALSE;
 		discord::Core::Create(FILTER_RPC_CLIENT_ID, DiscordCreateFlags_NoRequireDiscord, &core);
 		activity.SetState("起動中");
 		//activity.SetDetails("");
 		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
-
+			
 		});
 		Display_RPC(NULL, NULL);
 	}
@@ -252,8 +253,11 @@ BOOL Initialize_RPC() {
 	return TRUE;
 }
 BOOL Display_RPC(FILTER* fp, void* editPtr) {
+	if (!RPC_Enabled) {
+		return FALSE;
+	}
 	if (!IS_Disposed) {
-		const char* State = NULL;
+		std::string State = "";
 		if (IS_SAVING) {
 			State = "エンコード中";
 		}else if (FILE_NAME == NULL) {
@@ -262,11 +266,17 @@ BOOL Display_RPC(FILTER* fp, void* editPtr) {
 		else {
 			State = "編集中";
 		}
-		activity.SetState(State);
+		activity.SetState(State.c_str());
 		if (FILE_NAME != NULL) {
 			activity.SetDetails(FILE_NAME);
 		}
+		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
+			
+		});
 		core->RunCallbacks();
+	}
+	else {
+		Initialize_RPC();
 	}
 	return TRUE;
 }
