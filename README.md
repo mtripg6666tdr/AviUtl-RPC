@@ -16,6 +16,9 @@ AviUtlの`aviutl.exe`と同じディレクトリに`aviutl_rpc.auf`と`discord_g
 何か問題が発生したとき、あるいはAviUtlでエラーが発生したと表示されたときのうち本プラグインに起因すると思われる問題はGitHubのIssueに投稿をお願いします。
 それが出来ない場合は、[こちら](http://me.scrpg.tyanoyu.net)の連絡手段のいずれかを使ってご連絡いただければ幸いです。
 
+# 機能要望
+機能要望も上のIssueにお願いします。
+
 # 自前でビルド
 ## Visual Studioを使う場合
 `AviUtl-RPC.vcxproj`をVisual Studioで開いてビルドを実行するだけ
@@ -26,7 +29,8 @@ AviUtlの`aviutl.exe`と同じディレクトリに`aviutl_rpc.auf`と`discord_g
 モジュール定義ファイルは`main.def`を指定し、依存ライブラリに上で説明した`discord_game_sdk.dll.lib`を指定してください。
 
 # ライセンス・免責事項
-リポジトリの[LICENSE.md]を参照
+リポジトリの[LICENSE.md](LICENSE.md)を参照
+（リリースパッケージにも同封）
 
 # 著作権表示
 (c) mtripg6666tdr
