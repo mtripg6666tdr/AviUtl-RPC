@@ -5,13 +5,10 @@
 // インクルード
 #include <Windows.h>
 #include <string>
+#include <chrono>
 #include "aviutl-sdk/filter.h"
 #include "main.h"
 #include "discord-files/discord.h"
-
-typedef struct {
-	short x, y;
-} Vector2;
 
 // バッファー
 static void* buf0 = NULL;
@@ -19,12 +16,21 @@ static void* buf0 = NULL;
 static BOOL RPC_Enabled = TRUE;
 // セーブ中(エンコード中)かどうか
 static BOOL IS_SAVING = FALSE;
+// 前回のRPC更新時にセーブ中(エンコード中)かどうか
+static BOOL HAS_SAVING = FALSE;
 // 現在編集中のファイル名
-static LPSTR FILE_NAME = NULL;
+static const char* FILTER_CURRENT_FILENAME = NULL;
+// 前回のRPC更新時に編集中かどうか
+static BOOL HAS_EDITING = FALSE;
 // タイマーの識別子
 static UINT_PTR timer_identifer = NULL;
 // RPCが破棄されているかどうか
 static BOOL IS_Disposed = TRUE;
+// システム情報
+static LPSTR SYS_INFO_STR = NULL;
+// Detail Temp
+std::string detail;
+
 // Discord Core
 discord::Core* core{};
 // Discord Acticity
@@ -37,7 +43,7 @@ TCHAR   FILTER_NAME[]          = "AviUtl Discord RPC";
 #define CHECK_NUM 1
 TCHAR  *CHECKBOX_NAMES[]       = { "有効にする" };
 int     CHECKBOX_INITIAL_VAL[] = { 0 };
-TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC Plugin version 0.99b by mtripg6666tdr";
+TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99b by mtripg6666tdr";
 
 FILTER_DLL filter = {
 	// flag
@@ -72,7 +78,7 @@ FILTER_DLL filter = {
 	func_save_end,
 	/*外部関数テーブル*/NULL,/*システム使用*/NULL,NULL,NULL,/*I解除プラグインのみ*/NULL,
 	// プロジェクトファイル保存関連
-	NULL, NULL, 
+	NULL, func_project_save,
 	// タイトルバー表示関数
 	func_modify_title,
 	NULL, NULL
@@ -135,6 +141,17 @@ BOOL func_init(FILTER* fp) {
 	else {
 		throw;
 	}
+	SYS_INFO info;
+	if (fp->exfunc->get_sys_info(NULL, &info)) {
+		LPSTR ver = info.info;
+		LPSTR app_name = "AviUtl ";
+		LPSTR plugin_str = " (RPC powered by AviUtl RPC Plugin by mtripg6666tdr)";
+		SYS_INFO_STR = new char[strlen(ver) + strlen(app_name) + strlen(plugin_str) + 1];
+		int num = strlen(SYS_INFO_STR);
+		strcpy_s(SYS_INFO_STR, num, app_name);
+		strcat_s(SYS_INFO_STR, num, ver);
+		strcat_s(SYS_INFO_STR, num, plugin_str);
+	}
 	return TRUE;
 }
 
@@ -180,10 +197,19 @@ BOOL func_save_end(FILTER* fp, void* editP) {
 }
 
 //---------------------------------------------------------------------
+//		プロジェクト保存
+//---------------------------------------------------------------------
+BOOL func_project_save(FILTER* fp, void* editP, void* data, int* size) {
+	Update_RPC_Flags(fp, editP);
+	return FALSE;
+}
+
+//---------------------------------------------------------------------
 //		ウインドウタイトル変更
 //---------------------------------------------------------------------
 BOOL func_modify_title(FILTER* fp, void* editP, int frame, LPSTR title, int max_title) {
 	//Display_RPC(fp, editP);
+	Update_RPC_Flags(fp, editP);
 	return TRUE;
 }
 
@@ -198,12 +224,7 @@ void __stdcall func_timer_tick(HWND hWnd, UINT uMsg, UINT_PTR timer_id, DWORD dw
 //		ウインドウプロシージャ
 //---------------------------------------------------------------------
 BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* editPtr, FILTER* filterPtr) {
-	FILE_INFO* fi = NULL;
-
 	switch (message) {
-	/*case WM_FILTER_CHANGE_EDIT:
-		core->RunCallbacks();
-		break;*/
 	case WM_FILTER_CHANGE_WINDOW:
 		if (filterPtr->exfunc->is_filter_window_disp(filterPtr)) {
 			mem_alloc(filterPtr);
@@ -214,15 +235,10 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 		}
 		break;
 	case WM_FILTER_FILE_OPEN:
-		if (filterPtr->exfunc->get_file_info(editPtr, fi)) {
-			FILE_NAME = fi->name;
-		}
-		else {
-			FILE_NAME = NULL;
-		}
+		Update_RPC_Flags(filterPtr, editPtr);
 		break;
 	case WM_FILTER_FILE_CLOSE:
-		FILE_NAME = NULL;
+		FILTER_CURRENT_FILENAME = NULL;
 		core->RunCallbacks();
 		break;
 	}
@@ -241,11 +257,12 @@ BOOL Initialize_RPC() {
 		IS_Disposed = FALSE;
 		discord::Core::Create(FILTER_RPC_CLIENT_ID, DiscordCreateFlags_NoRequireDiscord, &core);
 		activity.SetState(u8"起動中");
-		//activity.SetDetails("");
+		activity.GetAssets().SetLargeImage("aviutl_icon_large");
+		activity.GetAssets().SetLargeText(SYS_INFO_STR == NULL ? "AviUtl" : SYS_INFO_STR);
+		activity.SetType(discord::ActivityType::Playing);
 		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 			
 		});
-		Display_RPC(NULL, NULL);
 	}
 	else {
 		throw;
@@ -258,18 +275,42 @@ BOOL Display_RPC(FILTER* fp, void* editPtr) {
 	}
 	if (!IS_Disposed) {
 		std::string State = "";
-		if (IS_SAVING) {
+		// Ref: https://stackoverflow.com/questions/6012663/get-unix-timestamp-with-c
+		if (!HAS_SAVING && IS_SAVING) {
 			State = u8"エンコード中";
-		}else if (FILE_NAME == NULL) {
+			activity.GetAssets().SetSmallImage("status_encoding");
+			activity.GetAssets().SetSmallText(u8"エンコード");
+			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			HAS_SAVING = TRUE;
+			if (FILTER_CURRENT_FILENAME != NULL) {
+				activity.SetDetails(FILTER_CURRENT_FILENAME);
+			}
+		}else if (FILTER_CURRENT_FILENAME == NULL) {
 			State = u8"アイドル中";
-		}
-		else {
+			activity.GetAssets().SetSmallImage("status_idle");
+			activity.GetAssets().SetSmallText(u8"アイドル状態");
+			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			HAS_EDITING = FALSE;
+			HAS_SAVING = FALSE;
+			if (FILTER_CURRENT_FILENAME != NULL) {
+				activity.SetDetails(FILTER_CURRENT_FILENAME);
+			}
+		} else if(!HAS_EDITING) {
 			State = u8"編集中";
+			activity.GetAssets().SetSmallImage("status_editing");
+			activity.GetAssets().SetSmallText(u8"編集中");
+			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			HAS_EDITING = TRUE;
+			HAS_SAVING = TRUE;
 		}
 		activity.SetState(State.c_str());
-		if (FILE_NAME != NULL) {
-			activity.SetDetails(FILE_NAME);
+		if (FILTER_CURRENT_FILENAME != NULL && strlen(FILTER_CURRENT_FILENAME) != 1) {
+			activity.GetAssets().SetSmallText(FILTER_CURRENT_FILENAME);
 		}
+		if (FILTER_CURRENT_FILENAME != NULL) {
+			activity.SetDetails(FILTER_CURRENT_FILENAME);
+		}
+
 		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 			
 		});
@@ -282,5 +323,27 @@ BOOL Display_RPC(FILTER* fp, void* editPtr) {
 }
 BOOL Dispose_RPC() {
 	IS_Disposed = TRUE;
+	return TRUE;
+}
+BOOL Update_RPC_Flags(FILTER* filterPtr, void* editPtr) {
+	SYS_INFO si;
+	FILE_INFO fi;
+	if (filterPtr->exfunc->get_file_info(editPtr, &fi)) {
+		detail = fi.name;
+		if (filterPtr->exfunc->get_sys_info(editPtr, &si)) {
+			std::string fullpath = si.project_name;
+			// Ref: https://qiita.com/takano_tak/items/acf34b4a30cb974bab65
+			int path_i = fullpath.find_last_of("\\") + 1;//7
+			int ext_i = fullpath.find_last_of(".");//10
+			std::string filename = fullpath.substr(path_i, ext_i - path_i) == "" ? "" : fullpath.substr(path_i, ext_i - path_i) + fullpath.substr(ext_i, fullpath.size() - ext_i);
+			detail += "(";
+			detail += filename == "" ? u8"未保存" : filename;
+			detail += ")";
+		}
+		FILTER_CURRENT_FILENAME = detail.c_str();
+	}
+	else {
+		FILTER_CURRENT_FILENAME = NULL;
+	}
 	return TRUE;
 }

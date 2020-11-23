@@ -15,6 +15,7 @@ BOOL func_WndProc(HWND, UINT, WPARAM, LPARAM, void*, FILTER*);
 BOOL Initialize_RPC();
 BOOL Display_RPC(FILTER*, void*);
 BOOL Dispose_RPC();
+BOOL Update_RPC_Flags(FILTER*, void*);
 void __stdcall func_timer_tick(HWND, UINT, UINT_PTR, DWORD);
 // チェックボックスのステータスがオフ
 #define FILTER_CHECKBOX_STATUS_OFF 0
