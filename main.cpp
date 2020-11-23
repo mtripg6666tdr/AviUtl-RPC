@@ -224,6 +224,10 @@ void __stdcall func_timer_tick(HWND hWnd, UINT uMsg, UINT_PTR timer_id, DWORD dw
 //		ウインドウプロシージャ
 //---------------------------------------------------------------------
 BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* editPtr, FILTER* filterPtr) {
+	if (core != NULL) {
+		core->RunCallbacks();
+	}
+
 	switch (message) {
 	case WM_FILTER_CHANGE_WINDOW:
 		if (filterPtr->exfunc->is_filter_window_disp(filterPtr)) {
@@ -239,7 +243,6 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 		break;
 	case WM_FILTER_FILE_CLOSE:
 		FILTER_CURRENT_FILENAME = NULL;
-		core->RunCallbacks();
 		break;
 	}
 	return FALSE;
