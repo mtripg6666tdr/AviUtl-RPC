@@ -6,6 +6,7 @@ AviUtlで編集時などに、Discordにステータスを表示する(RPC)プ�
 それに加え、現在のファイル名、経過時間も表示します。
 
 # 使い方
+GitHubのReleases（パソコンなら右カラム）から最新リリースを選択して、`Assets`のうちのaviutl_rpc_[バージョン名].zipを選択してダウンロードして展開します。
 AviUtlの`aviutl.exe`と同じディレクトリに`aviutl_rpc.auf`と`discord_game_sdk.dll`を移動してください。
 インストール時にはAviUtlの再起動が必要です。
 インストールされるとAviUtlの`表示`メニューに`AviUtl Discord RPCの表示`が追加されていますので、そこでプラグインの有効、無効を設定できます。
