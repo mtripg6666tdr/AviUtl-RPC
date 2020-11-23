@@ -121,6 +121,7 @@ BOOL func_proc(FILTER* fp, FILTER_PROC_INFO* fpip) {
 //---------------------------------------------------------------------
 //		初期化
 //---------------------------------------------------------------------
+#pragma optimize("", off)
 BOOL func_init(FILTER* fp) {
 //	MessageBox(NULL, "テスト", "テスト", MB_ICONINFORMATION);
 	UINT_PTR timer = SetTimer(
@@ -146,14 +147,16 @@ BOOL func_init(FILTER* fp) {
 		LPSTR ver = info.info;
 		LPSTR app_name = "AviUtl ";
 		LPSTR plugin_str = " (RPC powered by AviUtl RPC Plugin by mtripg6666tdr)";
-		SYS_INFO_STR = new char[strlen(ver) + strlen(app_name) + strlen(plugin_str) + 1];
-		int num = strlen(SYS_INFO_STR);
+		int num = strlen(ver) + strlen(app_name) + strlen(plugin_str) + 1;
+		SYS_INFO_STR = new char[num];
 		strcpy_s(SYS_INFO_STR, num, app_name);
 		strcat_s(SYS_INFO_STR, num, ver);
 		strcat_s(SYS_INFO_STR, num, plugin_str);
 	}
 	return TRUE;
 }
+#pragma optimize("", on)
+
 
 //---------------------------------------------------------------------
 //		終了
