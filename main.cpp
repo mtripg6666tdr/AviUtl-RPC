@@ -20,6 +20,8 @@ static BOOL IS_SAVING = FALSE;
 static BOOL HAS_SAVING = FALSE;
 // 現在編集中のファイル名
 static const char* FILTER_CURRENT_FILENAME = NULL;
+// フィル名がNULLだったかどうか
+static BOOL FILENAME_WAS_NULL = FALSE;
 // 前回のRPC更新時に編集中かどうか
 static BOOL HAS_EDITING = FALSE;
 // タイマーの識別子
@@ -295,7 +297,10 @@ BOOL Display_RPC(FILTER* fp, void* editPtr) {
 			State = u8"アイドル中";
 			activity.GetAssets().SetSmallImage("status_idle");
 			activity.GetAssets().SetSmallText(u8"アイドル状態");
-			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			if (!FILENAME_WAS_NULL) {
+				activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			}
+			FILENAME_WAS_NULL = TRUE;
 			HAS_EDITING = FALSE;
 			HAS_SAVING = FALSE;
 			if (FILTER_CURRENT_FILENAME != NULL) {
@@ -308,6 +313,7 @@ BOOL Display_RPC(FILTER* fp, void* editPtr) {
 			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 			HAS_EDITING = TRUE;
 			HAS_SAVING = TRUE;
+			FILENAME_WAS_NULL = FALSE;
 		}
 		activity.SetState(State.c_str());
 		if (FILTER_CURRENT_FILENAME != NULL && strlen(FILTER_CURRENT_FILENAME) != 1) {
