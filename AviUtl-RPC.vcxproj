@@ -189,6 +189,7 @@ echo Success</Command>
     <ClInclude Include="discord-files\user_manager.h" />
     <ClInclude Include="discord-files\voice_manager.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="strutil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="discord-files\achievement_manager.cpp" />
@@ -206,6 +207,7 @@ echo Success</Command>
     <ClCompile Include="discord-files\user_manager.cpp" />
     <ClCompile Include="discord-files\voice_manager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="strutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="main.def" />
