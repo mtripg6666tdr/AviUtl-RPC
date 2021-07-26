@@ -1,8 +1,6 @@
 //---------------------------------------------------------------------
 //      AviUtlでDiscord RPCを表示するプラグイン
 //---------------------------------------------------------------------
-
-// インクルード
 #include <Windows.h>
 #include <string>
 #include <chrono>
@@ -20,15 +18,15 @@ static BOOL RPC_Enabled = TRUE;
 // ファイル名を表示するかどうか
 static BOOL RPC_Display_Filename = TRUE;
 // ステータス
-static int Status = NULL;
-// 現在編集中のファイル名
-static const char* FILTER_CURRENT_FILENAME = NULL;
+static int Status = RPC_STATUS_IDLING;
 // タイマーの識別子
 static UINT_PTR timer_identifer = NULL;
 // RPCが破棄されているかどうか
 static BOOL IS_Disposed = TRUE;
 // システム情報
 static LPSTR SYS_INFO_STR = NULL;
+// 開始時刻が一度でも設定されているか
+static BOOL RPC_Timestamp_Set = FALSE;
 
 // Discord Core
 discord::Core* core{};
@@ -39,10 +37,11 @@ discord::Activity activity{};
 //		フィルタ構造体定義
 //---------------------------------------------------------------------
 TCHAR   FILTER_NAME[]          = "AviUtl Discord RPC";
-#define CHECK_NUM 1
+#define CHECK_NUM 2
 TCHAR*  CHECKBOX_NAMES[]       = { "有効にする", "ファイル名を表示する"};
 int     CHECKBOX_INITIAL_VAL[] = { 0          , 0 };
-TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99c by mtripg6666tdr";
+TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99d by mtripg6666tdr";
+TCHAR   VERSION[]              = "0.99d";
 
 FILTER_DLL filter = {
 	// flag
@@ -136,13 +135,16 @@ BOOL func_init(FILTER* fp) {
 	SYS_INFO info;
 	if (fp->exfunc->get_sys_info(NULL, &info)) {
 		LPSTR ver = info.info;
-		LPSTR app_name = "AviUtl ";
-		//LPSTR plugin_str = " (RPC powered by AviUtl RPC Plugin by mtripg6666tdr)";
-		int num = strlen(ver) + strlen(app_name) + /*strlen(plugin_str) +*/ 1;
+		LPSTR app_name = "AviUtl" " ";
+		LPSTR rpc_ver = " (RPC v";
+		LPSTR rpc_ver_end = ")";
+		int num = strlen(ver) + strlen(app_name) + strlen(rpc_ver) + strlen(VERSION) + strlen(rpc_ver_end) + 1;
 		SYS_INFO_STR = new char[num];
 		strcpy_s(SYS_INFO_STR, num, app_name);
 		strcat_s(SYS_INFO_STR, num, ver);
-		//strcat_s(SYS_INFO_STR, num, plugin_str);
+		strcat_s(SYS_INFO_STR, num, rpc_ver);
+		strcat_s(SYS_INFO_STR, num, VERSION);
+		strcat_s(SYS_INFO_STR, num, rpc_ver_end);
 	}
 	return TRUE;
 }
@@ -163,16 +165,26 @@ BOOL func_exit(FILTER* fp) {
 //		設定変更
 //---------------------------------------------------------------------
 BOOL func_update(FILTER* fp, int status) {
+	BOOL initialized = FALSE;
 	switch (fp->check[0]) {
 	case FILTER_CHECKBOX_STATUS_ON:
-		RPC_Enabled = TRUE;
-		Initialize_RPC();
-		Update_RPC(fp, NULL, Status, TRUE);
+		if (!RPC_Enabled) {
+			initialized = RPC_Enabled = TRUE;
+			Initialize_RPC();
+			Update_RPC(fp, NULL, Status, TRUE);
+		}
 		break;
 	case FILTER_CHECKBOX_STATUS_OFF:
-		RPC_Enabled = FALSE;
-		Dispose_RPC();
+		if (RPC_Enabled) {
+			RPC_Enabled = FALSE;
+			Dispose_RPC();
+		}
 		break;
+	}
+	BOOL fn_now = fp->check[1] == FILTER_CHECKBOX_STATUS_ON;
+	if (fn_now != RPC_Display_Filename || initialized) {
+		RPC_Display_Filename = fn_now;
+		PostMessage(fp->hwnd, WM_FILTER_CHANGE_PARAM_POST_EVENT, NULL, NULL);
 	}
 	return TRUE;
 }
@@ -230,6 +242,9 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 	case WM_FILTER_SAVE_START:
 		Update_RPC(filterPtr, editPtr, RPC_STATUS_SAVING, TRUE);
 		break;
+	case WM_FILTER_CHANGE_PARAM_POST_EVENT:
+		Update_RPC(filterPtr, editPtr, Status, FALSE);
+		break;
 	}
 	return FALSE;
 }
@@ -246,6 +261,7 @@ BOOL Initialize_RPC() {
 	}
 	if (IS_Disposed) {
 		discord::Core::Create(FILTER_RPC_CLIENT_ID, DiscordCreateFlags_NoRequireDiscord, &core);
+		RPC_Timestamp_Set = FALSE;
 		IS_Disposed = FALSE;
 	}
 	return TRUE;
@@ -260,7 +276,7 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 	}
 	if (!IS_Disposed) {
 		std::string detail = "";
-		if (editPtr != NULL && filterPtr != NULL) {
+		if (RPC_Display_Filename && editPtr != NULL && filterPtr != NULL) {
 			FILE_INFO fi;
 			SYS_INFO si;
 			if (filterPtr->exfunc->get_sys_info(editPtr, &si) && 
@@ -307,13 +323,12 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 		activity.SetState(StateStr.c_str());
 		activity.GetAssets().SetLargeImage("aviutl_icon_large");
 		activity.GetAssets().SetLargeText(SYS_INFO_STR == NULL ? "AviUtl" : SYS_INFO_STR);
-		if (isStart) {
+		if (isStart || !RPC_Timestamp_Set) {
 			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			RPC_Timestamp_Set = TRUE;
 		}
-		if (detail != "") {
-			activity.SetDetails(detail.c_str());
-		}
-
+		
+		activity.SetDetails(detail.c_str());
 		core->ActivityManager().UpdateActivity(activity, [](discord::Result result) {
 			
 		});
@@ -328,6 +343,8 @@ BOOL Dispose_RPC() {
 	if (core != NULL) {
 		core->ActivityManager().ClearActivity([](discord::Result result) {
 		});
+		core->~Core();
+		core = NULL;
 	}
 	return TRUE;
 }
