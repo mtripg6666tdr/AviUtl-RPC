@@ -17,6 +17,8 @@
 static void* buf0 = NULL;
 // RPCプラグインが有効かどうか
 static BOOL RPC_Enabled = TRUE;
+// ファイル名を表示するかどうか
+static BOOL RPC_Display_Filename = TRUE;
 // ステータス
 static int Status = NULL;
 // 現在編集中のファイル名
@@ -38,8 +40,8 @@ discord::Activity activity{};
 //---------------------------------------------------------------------
 TCHAR   FILTER_NAME[]          = "AviUtl Discord RPC";
 #define CHECK_NUM 1
-TCHAR  *CHECKBOX_NAMES[]       = { "有効にする" };
-int     CHECKBOX_INITIAL_VAL[] = { 0 };
+TCHAR*  CHECKBOX_NAMES[]       = { "有効にする", "ファイル名を表示する"};
+int     CHECKBOX_INITIAL_VAL[] = { 0          , 0 };
 TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99c by mtripg6666tdr";
 
 FILTER_DLL filter = {
@@ -135,12 +137,12 @@ BOOL func_init(FILTER* fp) {
 	if (fp->exfunc->get_sys_info(NULL, &info)) {
 		LPSTR ver = info.info;
 		LPSTR app_name = "AviUtl ";
-		LPSTR plugin_str = " (RPC powered by AviUtl RPC Plugin by mtripg6666tdr)";
-		int num = strlen(ver) + strlen(app_name) + strlen(plugin_str) + 1;
+		//LPSTR plugin_str = " (RPC powered by AviUtl RPC Plugin by mtripg6666tdr)";
+		int num = strlen(ver) + strlen(app_name) + /*strlen(plugin_str) +*/ 1;
 		SYS_INFO_STR = new char[num];
 		strcpy_s(SYS_INFO_STR, num, app_name);
 		strcat_s(SYS_INFO_STR, num, ver);
-		strcat_s(SYS_INFO_STR, num, plugin_str);
+		//strcat_s(SYS_INFO_STR, num, plugin_str);
 	}
 	return TRUE;
 }
@@ -195,14 +197,16 @@ BOOL func_modify_title(FILTER* fp, void* editP, int frame, LPSTR title, int max_
 //      コールバックを実行
 //---------------------------------------------------------------------
 void __stdcall func_timer_tick(HWND hWnd, UINT uMsg, UINT_PTR timer_id, DWORD dwTime) {
-	core->RunCallbacks();
+	if (core != NULL && RPC_Enabled) {
+		core->RunCallbacks();
+	}
 }
 
 //---------------------------------------------------------------------
 //		ウインドウプロシージャ
 //---------------------------------------------------------------------
 BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* editPtr, FILTER* filterPtr) {
-	if (core != NULL) {
+	if (core != NULL && RPC_Enabled) {
 		core->RunCallbacks();
 	}
 
@@ -321,7 +325,9 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 }
 BOOL Dispose_RPC() {
 	IS_Disposed = TRUE;
-	core->ActivityManager().ClearActivity([](discord::Result result) {
-	});
+	if (core != NULL) {
+		core->ActivityManager().ClearActivity([](discord::Result result) {
+		});
+	}
 	return TRUE;
 }
