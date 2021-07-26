@@ -27,6 +27,8 @@ static BOOL IS_Disposed = TRUE;
 static LPSTR SYS_INFO_STR = NULL;
 // 開始時刻が一度でも設定されているか
 static BOOL RPC_Timestamp_Set = FALSE;
+// 起動時の設定反映がされているか
+static BOOL RPC_func_update_fisrt_called = FALSE;
 
 // Discord Core
 discord::Core* core{};
@@ -40,8 +42,8 @@ TCHAR   FILTER_NAME[]          = "AviUtl Discord RPC";
 #define CHECK_NUM 2
 TCHAR*  CHECKBOX_NAMES[]       = { "有効にする", "ファイル名を表示する"};
 int     CHECKBOX_INITIAL_VAL[] = { 0          , 0 };
-TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99d by mtripg6666tdr";
-TCHAR   VERSION[]              = "0.99d";
+TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99e by mtripg6666tdr";
+TCHAR   VERSION[]              = "0.99e";
 
 FILTER_DLL filter = {
 	// flag
@@ -168,7 +170,7 @@ BOOL func_update(FILTER* fp, int status) {
 	BOOL initialized = FALSE;
 	switch (fp->check[0]) {
 	case FILTER_CHECKBOX_STATUS_ON:
-		if (!RPC_Enabled) {
+		if (!RPC_Enabled || !RPC_func_update_fisrt_called) {
 			initialized = RPC_Enabled = TRUE;
 			Initialize_RPC();
 			Update_RPC(fp, NULL, Status, TRUE);
@@ -186,6 +188,7 @@ BOOL func_update(FILTER* fp, int status) {
 		RPC_Display_Filename = fn_now;
 		PostMessage(fp->hwnd, WM_FILTER_CHANGE_PARAM_POST_EVENT, NULL, NULL);
 	}
+	RPC_func_update_fisrt_called = TRUE;
 	return TRUE;
 }
 
@@ -279,7 +282,8 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 		if (RPC_Display_Filename && editPtr != NULL && filterPtr != NULL) {
 			FILE_INFO fi;
 			SYS_INFO si;
-			if (filterPtr->exfunc->get_sys_info(editPtr, &si) && 
+			if (filterPtr->exfunc->is_editing(editPtr) &&
+				filterPtr->exfunc->get_sys_info(editPtr, &si) && 
 				filterPtr->exfunc->get_file_info(editPtr, &fi)
 				) {
 				detail += fi.name;
