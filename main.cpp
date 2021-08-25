@@ -278,6 +278,9 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 		return FALSE;
 	}
 	if (!IS_Disposed) {
+		if (core == NULL) {
+			return FALSE;
+		}
 		std::string detail = "";
 		if (RPC_Display_Filename && editPtr != NULL && filterPtr != NULL) {
 			FILE_INFO fi;
