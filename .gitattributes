@@ -1,1 +1,2 @@
 *.cpp diff=sjis
+aviutl-sdk/* linguist-vendored
