@@ -1,2 +1,3 @@
 *.cpp diff=sjis
 aviutl-sdk/* linguist-vendored
+discord-files/* linguist-vendored
