@@ -1,3 +1,4 @@
 *.cpp diff=sjis
 aviutl-sdk/* linguist-vendored
 discord-files/* linguist-vendored
+*.h linguist-language=C++
