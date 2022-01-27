@@ -31,7 +31,7 @@ AviUtlで編集時などに、Discordにステータスを表示する(RPC)プ�
 ただしプロジェクトディレクトリの直下に`Binaries`ディレクトリを作成してDiscord Developer Portalから入手できる`Discord Game SDK`に含まれている`discord_game_sdk.dll`と`discord_game_sdk.dll.lib`が必要です。個人でダウンロードしてください。
 
 ## ライセンス・免責事項
-リポジトリの[LICENSE.md](LICENSE.md)を参照  
+リポジトリの[LICENSE](LICENSE)を参照  
 （リリースのzipファイルにも同梱）
 
 ## 著作権表示
