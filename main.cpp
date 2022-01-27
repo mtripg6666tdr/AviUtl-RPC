@@ -9,6 +9,7 @@
 #include "aviutl-sdk/filter.h"
 #include "main.h"
 #include "discord-files/discord.h"
+#include "util.h"
 #include "strutil.h"
 
 // バッファー
@@ -169,7 +170,7 @@ BOOL func_update(FILTER* fp, int status) {
 		if (!RPC_Enabled || !RPC_func_update_fisrt_called) {
 			initialized = RPC_Enabled = TRUE;
 			Initialize_RPC();
-			Update_RPC(fp, NULL, Status, TRUE);
+			Update_RPC(fp, NULL, Status, TRUE, FALSE);
 		}
 		break;
 	case FILTER_CHECKBOX_STATUS_OFF:
@@ -192,7 +193,7 @@ BOOL func_update(FILTER* fp, int status) {
 //		プロジェクトファイルの保存
 //---------------------------------------------------------------------
 BOOL func_project_save(FILTER* fp, void* editp, void* data, int* size) {
-	Update_RPC(fp, editp, RPC_STATUS_EDITING, FALSE);
+	Update_RPC(fp, editp, RPC_STATUS_EDITING, FALSE, FALSE);
 	return FALSE;
 }
 
@@ -233,16 +234,16 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 		break;
 	case WM_FILTER_FILE_OPEN:
 	case WM_FILTER_SAVE_END:
-		Update_RPC(filterPtr, editPtr, RPC_STATUS_EDITING, TRUE);
+		Update_RPC(filterPtr, editPtr, RPC_STATUS_EDITING, TRUE, FALSE);
 		break;
 	case WM_FILTER_FILE_CLOSE:
-		Update_RPC(filterPtr, editPtr, RPC_STATUS_IDLING, TRUE);
+		Update_RPC(filterPtr, editPtr, RPC_STATUS_IDLING, TRUE, TRUE);
 		break;
 	case WM_FILTER_SAVE_START:
-		Update_RPC(filterPtr, editPtr, RPC_STATUS_SAVING, TRUE);
+		Update_RPC(filterPtr, editPtr, RPC_STATUS_SAVING, TRUE, FALSE);
 		break;
 	case WM_FILTER_CHANGE_PARAM_POST_EVENT:
-		Update_RPC(filterPtr, editPtr, Status, FALSE);
+		Update_RPC(filterPtr, editPtr, Status, FALSE, FALSE);
 		break;
 	}
 	return FALSE;
@@ -265,7 +266,7 @@ BOOL Initialize_RPC() {
 	}
 	return TRUE;
 }
-BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
+BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart, bool isClose = FALSE) {
 	// ステータスを保存
 	Status = status;
 
@@ -278,26 +279,18 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 			return FALSE;
 		}
 		std::string detail = "";
-		if (RPC_Display_Filename && editPtr != NULL && filterPtr != NULL) {
+		if (RPC_Display_Filename && editPtr != NULL && filterPtr != NULL && !isClose) {
 			FILE_INFO fi;
 			SYS_INFO si;
 			if (filterPtr->exfunc->is_editing(editPtr) &&
 				filterPtr->exfunc->get_sys_info(editPtr, &si) && 
 				filterPtr->exfunc->get_file_info(editPtr, &fi)
 				) {
-				detail += fi.name;
-				std::string filename;
-				std::string rawFileName = std::string(si.project_name);
-				if (rawFileName.find('\\') == std::string::npos) {
-					filename = rawFileName;
-				} else {
-					std::stringstream ss{ rawFileName };
-					std::string buf;
-					while (std::getline(ss, buf, '\\')) {
-						filename = buf;
-					}
-				}
-				filename = multi_to_utf8_winapi(filename);
+				// プロジェクト名のパスを削除
+				std::string projectName = multi_to_utf8_winapi(GetFileName(fi.name));
+				detail += projectName;
+				// ファイル名のパスを削除
+				std::string filename = multi_to_utf8_winapi(GetFileName(si.project_name));
 				detail += "(";
 #if R_ENGLISH
 				detail += filename == "" ? u8"Unsaved" : filename;
@@ -307,9 +300,8 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 				detail += ")";
 			}
 		}
-		else {
+		else
 			detail = "";
-		}
 
 		std::string StateStr = "";
 		// Ref: https://stackoverflow.com/questions/6012663/get-unix-timestamp-with-c

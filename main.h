@@ -12,7 +12,7 @@ BOOL func_modify_title(FILTER*);
 BOOL func_WndProc(HWND, UINT, WPARAM, LPARAM, void*, FILTER*);
 BOOL Initialize_RPC();
 BOOL Dispose_RPC();
-BOOL Update_RPC(FILTER*,void*, int, bool);
+BOOL Update_RPC(FILTER*,void*, int, bool, bool);
 void __stdcall func_timer_tick(HWND, UINT, UINT_PTR, DWORD);
 
 // チェックボックスのステータスがオフ
