@@ -10,9 +10,9 @@ When idling, editing, and encoding, this will show current status in user profil
 In addition to that, this will show also the file name you are now editing. You can disable this feature in configuration window.  
 
 ## Installing
-1. Go 'Releases' page in GitHub and find newest releases. Download aviutl_rpc_[version number].zip in 'Assets'    
+1. Go 'Releases' page in GitHub and find newest releases. Download aviutl_rpc_en_[version number].zip in 'Assets'    
 2. Unzip the file you downloaded in Step.1    
-3. Place `aviutl_rpc.auf` and `discord_game_sdk.dll` in the same directory where `aviutl.exe` is placed. Restart AviUtl app if you have already opened it.  
+3. Place `aviutl_rpc_en.auf` and `discord_game_sdk.dll` in the same directory where `aviutl.exe` is placed. Restart AviUtl app if you have already opened it.  
 
 ## How to use
 ### Enable/Disable the plugin
