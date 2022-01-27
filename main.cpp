@@ -307,6 +307,9 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 				detail += ")";
 			}
 		}
+		else {
+			detail = "";
+		}
 
 		std::string StateStr = "";
 		// Ref: https://stackoverflow.com/questions/6012663/get-unix-timestamp-with-c
