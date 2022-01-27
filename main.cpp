@@ -38,12 +38,16 @@ discord::Activity activity{};
 //---------------------------------------------------------------------
 //		フィルタ構造体定義
 //---------------------------------------------------------------------
-TCHAR   FILTER_NAME[]          = "AviUtl Discord RPC";
+TCHAR FILTER_NAME[] = "AviUtl Discord RPC";
 #define CHECK_NUM 2
-TCHAR*  CHECKBOX_NAMES[]       = { "有効にする", "ファイル名を表示する"};
-int     CHECKBOX_INITIAL_VAL[] = { 0          , 0 };
-TCHAR   FILTER_INFO[]          = "AviUtl Discord RPC version 0.99e by mtripg6666tdr";
-TCHAR   VERSION[]              = "0.99e";
+#if R_ENGLISH
+TCHAR* CHECKBOX_NAMES[] = { "Enable RPC", "Show filenames" };
+#else
+TCHAR* CHECKBOX_NAMES[] = { "有効にする", "ファイル名を表示する" };
+#endif
+int     CHECKBOX_INITIAL_VAL[] = { 0, 0 };
+TCHAR   FILTER_INFO[] = "AviUtl Discord RPC version 0.99e by mtripg6666tdr";
+TCHAR   VERSION[] = "0.99e";
 
 FILTER_DLL filter = {
 	// flag
@@ -303,7 +307,11 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 				}
 				filename = multi_to_utf8_winapi(filename);
 				detail += "(";
+#if R_ENGLISH
+				detail += filename == "" ? u8"Unsaved" : filename;
+#else
 				detail += filename == "" ? u8"未保存" : filename;
+#endif
 				detail += ")";
 			}
 		}
@@ -312,19 +320,34 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 		// Ref: https://stackoverflow.com/questions/6012663/get-unix-timestamp-with-c
 		switch (status) {
 		case RPC_STATUS_SAVING:
+#if R_ENGLISH
+			StateStr = u8"Encoding";
+			activity.GetAssets().SetSmallText(u8"Encode");
+#else
 			StateStr = u8"エンコード中";
-			activity.GetAssets().SetSmallImage("status_encoding");
 			activity.GetAssets().SetSmallText(u8"エンコード");
+#endif
+			activity.GetAssets().SetSmallImage("status_encoding");
 			break;
 		case RPC_STATUS_IDLING:
+#if R_ENGLISH
+			StateStr = u8"Idling";
+			activity.GetAssets().SetSmallText(u8"Idle");
+#else
 			StateStr = u8"アイドル中";
-			activity.GetAssets().SetSmallImage("status_idle");
 			activity.GetAssets().SetSmallText(u8"アイドル状態");
+#endif
+			activity.GetAssets().SetSmallImage("status_idle");
 			break;
 		case RPC_STATUS_EDITING:
+#if R_ENGLISH
+			StateStr = u8"Editing";
+			activity.GetAssets().SetSmallText(u8"Editing");
+#else
 			StateStr = u8"編集中";
-			activity.GetAssets().SetSmallImage("status_editing");
 			activity.GetAssets().SetSmallText(u8"編集中");
+#endif
+			activity.GetAssets().SetSmallImage("status_editing");
 			break;
 		}
 		activity.SetState(StateStr.c_str());

@@ -65,3 +65,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/c++,windows
 /Debug
 /Release
+/Debug_EN
+/Release_EN
