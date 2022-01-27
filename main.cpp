@@ -24,7 +24,7 @@ static UINT_PTR timer_identifer = NULL;
 // RPCが破棄されているかどうか
 static BOOL IS_Disposed = TRUE;
 // システム情報
-static LPSTR SYS_INFO_STR = NULL;
+static std::string SYS_INFO_STR = "";
 // 開始時刻が一度でも設定されているか
 static BOOL RPC_Timestamp_Set = FALSE;
 // 起動時の設定反映がされているか
@@ -117,7 +117,6 @@ void mem_free(void) {
 //---------------------------------------------------------------------
 //		初期化
 //---------------------------------------------------------------------
-#pragma optimize("", off)
 BOOL func_init(FILTER* fp) {
 	// コールバックを実行するためのタイマーを設定
 	UINT_PTR timer = SetTimer(
@@ -140,22 +139,15 @@ BOOL func_init(FILTER* fp) {
 	}
 	SYS_INFO info;
 	if (fp->exfunc->get_sys_info(NULL, &info)) {
-		LPSTR ver = info.info;
-		LPSTR app_name = "AviUtl" " ";
-		LPSTR rpc_ver = " (RPC v";
-		LPSTR rpc_ver_end = ")";
-		int num = strlen(ver) + strlen(app_name) + strlen(rpc_ver) + strlen(VERSION) + strlen(rpc_ver_end) + 1;
-		SYS_INFO_STR = new char[num];
-		strcpy_s(SYS_INFO_STR, num, app_name);
-		strcat_s(SYS_INFO_STR, num, ver);
-		strcat_s(SYS_INFO_STR, num, rpc_ver);
-		strcat_s(SYS_INFO_STR, num, VERSION);
-		strcat_s(SYS_INFO_STR, num, rpc_ver_end);
+		SYS_INFO_STR = "AviUtl ";
+		SYS_INFO_STR += info.info;
+		SYS_INFO_STR += " (RPC v";
+		SYS_INFO_STR += VERSION;
+		SYS_INFO_STR += ")";
+		SYS_INFO_STR = multi_to_utf8_winapi(SYS_INFO_STR);
 	}
 	return TRUE;
 }
-#pragma optimize("", on)
-
 
 //---------------------------------------------------------------------
 //		終了
@@ -352,7 +344,7 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart) {
 		}
 		activity.SetState(StateStr.c_str());
 		activity.GetAssets().SetLargeImage("aviutl_icon_large");
-		activity.GetAssets().SetLargeText(SYS_INFO_STR == NULL ? "AviUtl" : SYS_INFO_STR);
+		activity.GetAssets().SetLargeText(SYS_INFO_STR == "" ? "AviUtl" : SYS_INFO_STR.c_str());
 		if (isStart || !RPC_Timestamp_Set) {
 			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 			RPC_Timestamp_Set = TRUE;
@@ -376,5 +368,6 @@ BOOL Dispose_RPC() {
 		core->~Core();
 		core = NULL;
 	}
+	SYS_INFO_STR.~basic_string();
 	return TRUE;
 }
