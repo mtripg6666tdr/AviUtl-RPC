@@ -10,6 +10,7 @@ BOOL func_exit(FILTER*);
 BOOL func_update(FILTER*);
 BOOL func_modify_title(FILTER*);
 BOOL func_WndProc(HWND, UINT, WPARAM, LPARAM, void*, FILTER*);
+BOOL Update_PluginMetaInfo(FILTER* fp);
 BOOL Initialize_RPC();
 BOOL Dispose_RPC();
 BOOL Update_RPC(FILTER*,void*, int, bool, bool);

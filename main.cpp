@@ -138,15 +138,7 @@ BOOL func_init(FILTER* fp) {
 	else {
 		throw;
 	}
-	SYS_INFO info;
-	if (fp->exfunc->get_sys_info(NULL, &info)) {
-		SYS_INFO_STR = "AviUtl ";
-		SYS_INFO_STR += info.info;
-		SYS_INFO_STR += " (RPC v";
-		SYS_INFO_STR += VERSION;
-		SYS_INFO_STR += ")";
-		SYS_INFO_STR = multi_to_utf8_winapi(SYS_INFO_STR);
-	}
+	Update_PluginMetaInfo(fp);
 	return TRUE;
 }
 
@@ -249,6 +241,22 @@ BOOL func_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam, void* e
 	return FALSE;
 }
 
+// プラグインメタデータアップデート
+BOOL Update_PluginMetaInfo(FILTER* fp) {
+	SYS_INFO info;
+	if (fp->exfunc->get_sys_info(NULL, &info)) {
+		SYS_INFO_STR = "AviUtl ";
+		SYS_INFO_STR += info.info;
+		SYS_INFO_STR += " (RPC v";
+		SYS_INFO_STR += VERSION;
+		SYS_INFO_STR += ")";
+		SYS_INFO_STR = multi_to_utf8_winapi(SYS_INFO_STR);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
 //---------------------------------------------------------------------
 //		Discord RPC 設定関数
 //---------------------------------------------------------------------
@@ -339,6 +347,7 @@ BOOL Update_RPC(FILTER* filterPtr, void* editPtr, int status, bool isStart, bool
 		}
 		activity.SetState(StateStr.c_str());
 		activity.GetAssets().SetLargeImage("aviutl_icon_large");
+		if (SYS_INFO_STR == "") Update_PluginMetaInfo(filterPtr);
 		activity.GetAssets().SetLargeText(SYS_INFO_STR == "" ? "AviUtl" : SYS_INFO_STR.c_str());
 		if (isStart || !RPC_Timestamp_Set) {
 			activity.GetTimestamps().SetStart(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
