@@ -32,7 +32,7 @@ You can post it in the same way mentioned above.
 Open `AviUtl-RPC.vcxproj` in Visual Studio, and build.  
 However you should follow these steps before building:
 1. Make 'Binaries' directory in the root of this project.
-2. Place `discord_game_sdk.dll`と`discord_game_sdk.dll.lib` in the directory. These files are contained in `Discord Game SDK`, which you can download in [Discord Developer Portal](https://discord.com/developers/docs/game-sdk/sdk-starter-guide)
+2. Place `discord_game_sdk.dll` and `discord_game_sdk.dll.lib` in the directory. These files are contained in `Discord Game SDK`, which you can download in [Discord Developer Portal](https://discord.com/developers/docs/game-sdk/sdk-starter-guide)
 
 ## License and disclaimer
 See [LICENSE](../LICENSE).  
