@@ -47,8 +47,8 @@ TCHAR* CHECKBOX_NAMES[] = { "Enable RPC", "Show filenames" };
 TCHAR* CHECKBOX_NAMES[] = { "有効にする", "ファイル名を表示する" };
 #endif
 int     CHECKBOX_INITIAL_VAL[] = { 0, 0 };
-TCHAR   FILTER_INFO[] = "AviUtl Discord RPC version 0.99e by mtripg6666tdr";
-TCHAR   VERSION[] = "0.99e";
+TCHAR   FILTER_INFO[] = "AviUtl Discord RPC version 1.0 by mtripg6666tdr";
+TCHAR   VERSION[] = "1.0";
 
 FILTER_DLL filter = {
 	// flag
