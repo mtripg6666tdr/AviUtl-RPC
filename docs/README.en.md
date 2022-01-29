@@ -16,7 +16,7 @@ In addition to that, this will show also the file name you are now editing. You 
 
 ## How to use
 ### Enable/Disable the plugin
-If it's been installed successfully, you can find `Show AviUtl Discord RPC` option in 'View' menu in AviUtl (may be different and this is depend on which language plugin you applyed)  
+If it's been installed successfully, you can find `Show AviUtl Discord RPC` option in 'View' menu in AviUtl (may be different and this is depend on which language plugin you applied)  
 You can enable/disable this plugin and showing filenames in the configuration window.  
 Settings will be stored in profiles. The plugin will be disabled as default in the project files you edited before installing it.
 If you change these settings in idling state, the plugin will use them in the projects you edit after this
