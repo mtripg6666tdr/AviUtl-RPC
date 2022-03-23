@@ -1,6 +1,6 @@
 # AviUtl-RPC 
 README is also avaliable in [English](docs/README.en.md)  
-![Discordに表示される画面](https://me.myon.ga/assets/AviUtl-RPC.png)  
+![Discordに表示される画面](https://www.usamyon.moe/assets/AviUtl-RPC.png)  
 ![設定画面](https://user-images.githubusercontent.com/56076195/148711806-cb1e30c2-f12c-46a1-a035-78ae4891bb48.png)  
 AviUtlで編集時などに、Discordにステータスを表示する(RPC)プラグイン
 
