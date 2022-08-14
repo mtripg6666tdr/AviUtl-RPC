@@ -1,4 +1,5 @@
 # AviUtl-RPC 
+[![GitHub all releases](https://img.shields.io/github/downloads/mtripg6666tdr/AviUtl-RPC/total)](https://github.com/mtripg6666tdr/AviUtl-RPC/releases)  
 README is also avaliable in [English](docs/README.en.md)  
 ![Discordに表示される画面](https://www.usamyon.moe/assets/AviUtl-RPC.png)  
 ![設定画面](https://user-images.githubusercontent.com/56076195/148711806-cb1e30c2-f12c-46a1-a035-78ae4891bb48.png)  
