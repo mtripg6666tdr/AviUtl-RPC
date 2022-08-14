@@ -1,4 +1,7 @@
 # AviUtl-RPC 
+[![GitHub all releases](https://img.shields.io/github/downloads/mtripg6666tdr/AviUtl-RPC/total)](https://github.com/mtripg6666tdr/AviUtl-RPC/releases)  
+[READMEは日本語版もご利用いただけます](../README.md)
+
 ![rich presence example](https://user-images.githubusercontent.com/56076195/151333122-b7f83afd-fb80-4191-a368-b43edea5a9a8.png)
   
 ![configuration window](https://user-images.githubusercontent.com/56076195/151332948-63068f62-5563-40f6-a889-b9d8091cd79b.png)
