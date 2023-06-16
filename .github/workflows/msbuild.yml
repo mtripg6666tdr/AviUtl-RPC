@@ -41,8 +41,8 @@ jobs:
       if: ${{ steps.discord-deps.cache-hit != 'true' }}
       run: |
         mkdir Binaries
-        curl -Lo Binaries/discord_game_sdk.dll ${{ env.SELFHOST_DLL_URL }}
-        curl -Lo Binaries/discord_game_sdk.dll.lib ${{ env.SELFHOST_LIB_URL }}
+        curl -Lo Binaries/discord_game_sdk.dll ${{ secrets.SELFHOST_DLL_URL }}
+        curl -Lo Binaries/discord_game_sdk.dll.lib ${{ secrets.SELFHOST_LIB_URL }}
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1
