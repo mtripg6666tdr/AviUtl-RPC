@@ -29,9 +29,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Check cache of required dependencies
+      uses: actions/cache@v3
+      id: discord-deps
+      with:
+        path: Binaries
+        key: required-discord-deps
+    
+    - name: Download required dependencies
+      if: ${{ steps.discord-deps.cache-hit != 'true' }}
+      run: |
+        mkdir Binaries
+        curl -Lo Binaries/discord_game_sdk.dll ${{ env.SELFHOST_DLL_URL }}
+        curl -Lo Binaries/discord_game_sdk.dll.lib ${{ env.SELFHOST_LIB_URL }}
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
