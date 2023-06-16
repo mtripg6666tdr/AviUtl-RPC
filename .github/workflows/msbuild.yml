@@ -38,7 +38,7 @@ jobs:
         key: required-discord-deps
     
     - name: Download required dependencies
-      if: ${{ steps.discord-deps.cache-hit != 'true' }}
+      if: ${{ steps.discord-deps.outputs.cache-hit != 'true' }}
       run: |
         mkdir Binaries
         curl -Lo Binaries/discord_game_sdk.dll ${{ secrets.SELFHOST_DLL_URL }}
