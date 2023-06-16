@@ -113,7 +113,7 @@
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo Installing compiled plugin...
@@ -140,7 +140,7 @@ echo Success</Command>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
-      <AdditionalDependencies>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo Installing compiled plugin...
@@ -171,7 +171,7 @@ echo Success</Command>
       <ModuleDefinitionFile>main.def</ModuleDefinitionFile>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <ShowProgress>LinkVerbose</ShowProgress>
-      <AdditionalDependencies>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_EN|Win32'">
@@ -193,7 +193,7 @@ echo Success</Command>
       <ModuleDefinitionFile>main.def</ModuleDefinitionFile>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <ShowProgress>LinkVerbose</ShowProgress>
-      <AdditionalDependencies>C:\Users\homep\source\repos\AviUtl-RPC\AviUtl-RPC\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)\Binaries\discord_game_sdk.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
